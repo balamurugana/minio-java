@@ -56,6 +56,10 @@ import java.nio.file.StandardOpenOption;
 import com.google.common.io.ByteStreams;
 import java.nio.file.StandardCopyOption;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+
 
 /**
  * <p>
@@ -1073,6 +1077,44 @@ public final class MinioClient {
     ResponseHeader header = response.header();
     return new ObjectStat(bucketName, objectName, header.lastModified(), header.contentLength(),
                           header.etag(), header.contentType());
+  }
+
+
+  /**
+   * Returns a {@link Future} task of meta data information of given object in given bucket.
+   *
+   * </p><b>Example:</b><br>
+   * <pre>{@code ExecutorService executor = Executors.newFixedThreadPool(3);
+   * Future<ObjectStat> future = minioClient.statObject(executor, "my-bucketname", "my-objectname");
+   * while (!future.isDone()) {
+   *   System.out.println("Task is not completed yet.  Retrying after 1 millisecond...");
+   *   Thread.sleep(1);
+   * }
+   * System.out.println("Task is completed");
+   * System.out.println(Future.get()); }</pre>
+   *
+   * @param executor   thread pool.
+   * @param bucketName Bucket name.
+   * @param objectName Object name in the bucket.
+   *
+   * @return {@link Future} task.
+   *
+   * @see ObjectStat
+   */
+  public Future<ObjectStat> statObject(ExecutorService executor, final String bucketName, final String objectName) {
+    final MinioClient thisClient = this;
+
+    Callable<ObjectStat> task = new Callable<ObjectStat>() {
+      @Override
+      public ObjectStat call()
+        throws InvalidBucketNameException, NoSuchAlgorithmException, InsufficientDataException, IOException,
+               InvalidKeyException, NoResponseException, XmlPullParserException, ErrorResponseException,
+               InternalException {
+        return thisClient.statObject(bucketName, objectName);
+      }
+    };
+
+    return executor.submit(task);
   }
 
 
