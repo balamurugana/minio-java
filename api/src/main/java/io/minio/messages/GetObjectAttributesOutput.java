@@ -16,11 +16,8 @@
 
 package io.minio.messages;
 
-import io.minio.Utils;
 import java.time.ZonedDateTime;
-import java.util.List;
 import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Namespace;
 import org.simpleframework.xml.Root;
 
@@ -98,45 +95,12 @@ public class GetObjectAttributesOutput {
   }
 
   @Root(name = "ObjectParts", strict = false)
-  public static class ObjectParts {
-    @Element(name = "IsTruncated", required = false)
-    private boolean isTruncated;
-
-    @Element(name = "MaxParts", required = false)
-    private Integer maxParts;
-
-    @Element(name = "NextPartNumberMarker", required = false)
-    private Integer nextPartNumberMarker;
-
-    @Element(name = "PartNumberMarker", required = false)
-    private Integer partNumberMarker;
-
-    @ElementList(name = "Part", inline = true, required = false)
-    private List<Part> parts;
-
+  public static class ObjectParts extends BasePartsResult {
     @Element(name = "PartsCount", required = false)
     private Integer partsCount;
 
-    public ObjectParts() {}
-
-    public boolean isTruncated() {
-      return isTruncated;
-    }
-
-    public Integer maxParts() {
-      return maxParts;
-    }
-
-    public Integer nextPartNumberMarker() {
-      return nextPartNumberMarker;
-    }
-
-    public Integer partNumberMarker() {
-      return partNumberMarker;
-    }
-
-    public List<Part> parts() {
-      return Utils.unmodifiableList(parts);
+    public ObjectParts() {
+      super();
     }
 
     public Integer partsCount() {

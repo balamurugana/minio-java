@@ -19,12 +19,14 @@ package io.minio.messages;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.minio.Utils;
+import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Object representation of JSON format of <a
- * href="http://docs.aws.amazon.com/AmazonS3/latest/dev/notification-content-structure.html">Event
- * Message Structure</a>.
+ * href="http://docs.aws.amazon.com/AmazonS3/latest/dev/notification-content-structure.html">Notification
+ * Content Structure</a>.
  */
 @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
     value = "UwF",
@@ -35,5 +37,172 @@ public class NotificationRecords {
 
   public List<Event> events() {
     return Utils.unmodifiableList(events);
+  }
+
+  @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
+      value = "UuF",
+      justification = "eventVersion and eventSource are available for completeness")
+  public static class Event {
+    @JsonProperty private String eventVersion;
+    @JsonProperty private String eventSource;
+    @JsonProperty private String awsRegion;
+    @JsonProperty private String eventName;
+    @JsonProperty private Identity userIdentity;
+    @JsonProperty private Map<String, String> requestParameters;
+    @JsonProperty private Map<String, String> responseElements;
+    @JsonProperty private S3 s3;
+    @JsonProperty private Source source;
+    @JsonProperty private ResponseDate eventTime;
+
+    public String eventVersion() {
+      return eventVersion;
+    }
+
+    public String eventSource() {
+      return eventSource;
+    }
+
+    public String awsRegion() {
+      return awsRegion;
+    }
+
+    public String eventName() {
+      return eventName;
+    }
+
+    public String userIdentity() {
+      return userIdentity == null ? null : userIdentity.principalId();
+    }
+
+    public Map<String, String> requestParameters() {
+      return Utils.unmodifiableMap(requestParameters);
+    }
+
+    public Map<String, String> responseElements() {
+      return Utils.unmodifiableMap(responseElements);
+    }
+
+    public Bucket bucket() {
+      return s3 == null ? null : s3.bucket();
+    }
+
+    public Object object() {
+      return s3 == null ? null : s3.object();
+    }
+
+    public Source source() {
+      return source;
+    }
+
+    public ZonedDateTime eventTime() {
+      return eventTime.zonedDateTime();
+    }
+
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
+        value = "UwF",
+        justification = "Everything in this class is initialized by JSON unmarshalling.")
+    public static class Identity {
+      @JsonProperty private String principalId;
+
+      public String principalId() {
+        return principalId;
+      }
+    }
+
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
+        value = "UwF",
+        justification = "Everything in this class is initialized by JSON unmarshalling.")
+    public static class Bucket {
+      @JsonProperty private String name;
+      @JsonProperty private Identity ownerIdentity;
+      @JsonProperty private String arn;
+
+      public String name() {
+        return name;
+      }
+
+      public String ownerIdentity() {
+        return ownerIdentity == null ? null : ownerIdentity.principalId();
+      }
+
+      public String arn() {
+        return arn;
+      }
+    }
+
+    public static class Object {
+      @JsonProperty private String key;
+      @JsonProperty private long size;
+      @JsonProperty private String eTag;
+      @JsonProperty private String versionId;
+      @JsonProperty private String sequencer;
+      @JsonProperty private Map<String, String> userMetadata; // MinIO specific extension.
+
+      public String key() {
+        return key;
+      }
+
+      public long size() {
+        return size;
+      }
+
+      public String etag() {
+        return eTag;
+      }
+
+      public String versionId() {
+        return versionId;
+      }
+
+      public String sequencer() {
+        return sequencer;
+      }
+
+      public Map<String, String> userMetadata() {
+        return Utils.unmodifiableMap(userMetadata);
+      }
+    }
+
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
+        value = {"UwF", "UuF"},
+        justification =
+            "Everything in this class is initialized by JSON unmarshalling "
+                + "and s3SchemaVersion/configurationId are available for completeness.")
+    public static class S3 {
+      @JsonProperty private String s3SchemaVersion;
+      @JsonProperty private String configurationId;
+      @JsonProperty private Bucket bucket;
+      @JsonProperty private Object object;
+
+      public Bucket bucket() {
+        return bucket;
+      }
+
+      public Object object() {
+        return object;
+      }
+    }
+
+    /** This is MinIO extension. */
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
+        value = "UwF",
+        justification = "Everything in this class is initialized by JSON unmarshalling.")
+    public static class Source {
+      @JsonProperty private String host;
+      @JsonProperty private String port;
+      @JsonProperty private String userAgent;
+
+      public String host() {
+        return host;
+      }
+
+      public String port() {
+        return port;
+      }
+
+      public String userAgent() {
+        return userAgent;
+      }
+    }
   }
 }

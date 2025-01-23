@@ -19,6 +19,7 @@ package io.minio.messages;
 import io.minio.Utils;
 import java.util.LinkedList;
 import java.util.List;
+import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Namespace;
 import org.simpleframework.xml.Root;
@@ -32,26 +33,65 @@ import org.simpleframework.xml.Root;
 @Namespace(reference = "http://s3.amazonaws.com/doc/2006-03-01/")
 public class DeleteResult {
   @ElementList(name = "Deleted", inline = true, required = false)
-  private List<DeletedObject> objectList;
+  private List<Deleted> objectList;
 
   @ElementList(name = "Error", inline = true, required = false)
-  private List<DeleteError> errorList;
+  private List<Error> errorList;
 
   public DeleteResult() {}
 
   /** Constructs new delete result with an error. */
-  public DeleteResult(DeleteError error) {
-    this.errorList = new LinkedList<DeleteError>();
+  public DeleteResult(Error error) {
+    this.errorList = new LinkedList<Error>();
     this.errorList.add(error);
   }
 
   /** Returns deleted object list. */
-  public List<DeletedObject> objectList() {
+  public List<Deleted> objectList() {
     return Utils.unmodifiableList(objectList);
   }
 
   /** Returns delete error list. */
-  public List<DeleteError> errorList() {
+  public List<Error> errorList() {
     return Utils.unmodifiableList(errorList);
+  }
+
+  @Root(name = "Deleted", strict = false)
+  public static class Deleted {
+    @Element(name = "Key")
+    private String name;
+
+    @Element(name = "VersionId", required = false)
+    private String versionId;
+
+    @Element(name = "DeleteMarker", required = false)
+    private boolean deleteMarker;
+
+    @Element(name = "DeleteMarkerVersionId", required = false)
+    private String deleteMarkerVersionId;
+
+    public Deleted() {}
+
+    public String name() {
+      return name;
+    }
+
+    public String versionId() {
+      return versionId;
+    }
+
+    public boolean deleteMarker() {
+      return deleteMarker;
+    }
+
+    public String deleteMarkerVersionId() {
+      return deleteMarkerVersionId;
+    }
+  }
+
+  @Root(name = "Error", strict = false)
+  @Namespace(reference = "http://s3.amazonaws.com/doc/2006-03-01/")
+  public static class Error extends ErrorResponse {
+    private static final long serialVersionUID = 1905162041950251407L; // fix SE_BAD_FIELD
   }
 }

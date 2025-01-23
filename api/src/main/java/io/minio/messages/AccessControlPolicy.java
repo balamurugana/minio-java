@@ -54,18 +54,20 @@ public class AccessControlPolicy {
   public String cannedAcl() {
     if (accessControlList == null) return "";
 
-    List<Grant> grants = accessControlList.grants();
+    List<AccessControlList.Grant> grants = accessControlList.grants();
     int size = grants.size();
 
     if (size < 1 || size > 3) return "";
 
-    for (Grant grant : grants) {
+    for (AccessControlList.Grant grant : grants) {
       if (grant == null) continue;
 
       String uri = grant.granteeUri();
-      if (grant.permission() == Permission.FULL_CONTROL && size == 1 && "".equals(uri)) {
+      if (grant.permission() == AccessControlList.Permission.FULL_CONTROL
+          && size == 1
+          && "".equals(uri)) {
         return "private";
-      } else if (grant.permission() == Permission.READ && size == 2) {
+      } else if (grant.permission() == AccessControlList.Permission.READ && size == 2) {
         if ("http://acs.amazonaws.com/groups/global/AuthenticatedUsers".equals(uri)) {
           return "authenticated-read";
         }
@@ -75,7 +77,7 @@ public class AccessControlPolicy {
             && owner.id().equals(grant.granteeId())) {
           return "bucket-owner-read";
         }
-      } else if (grant.permission() == Permission.WRITE
+      } else if (grant.permission() == AccessControlList.Permission.WRITE
           && size == 3
           && "http://acs.amazonaws.com/groups/global/AllUsers".equals(uri)) {
         return "public-read-write";
@@ -90,19 +92,19 @@ public class AccessControlPolicy {
 
     if (accessControlList != null) {
       map = HashMultimap.create();
-      for (Grant grant : accessControlList.grants()) {
+      for (AccessControlList.Grant grant : accessControlList.grants()) {
         if (grant == null) continue;
 
         String value = "id=" + grant.granteeId();
-        if (grant.permission() == Permission.READ) {
+        if (grant.permission() == AccessControlList.Permission.READ) {
           map.put("X-Amz-Grant-Read", value);
-        } else if (grant.permission() == Permission.WRITE) {
+        } else if (grant.permission() == AccessControlList.Permission.WRITE) {
           map.put("X-Amz-Grant-Write", value);
-        } else if (grant.permission() == Permission.READ_ACP) {
+        } else if (grant.permission() == AccessControlList.Permission.READ_ACP) {
           map.put("X-Amz-Grant-Read-Acp", value);
-        } else if (grant.permission() == Permission.WRITE_ACP) {
+        } else if (grant.permission() == AccessControlList.Permission.WRITE_ACP) {
           map.put("X-Amz-Grant-Write-Acp", value);
-        } else if (grant.permission() == Permission.FULL_CONTROL) {
+        } else if (grant.permission() == AccessControlList.Permission.FULL_CONTROL) {
           map.put("X-Amz-Grant-Full-Control", value);
         }
       }

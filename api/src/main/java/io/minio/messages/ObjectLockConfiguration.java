@@ -17,8 +17,11 @@
 package io.minio.messages;
 
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementUnion;
 import org.simpleframework.xml.Namespace;
+import org.simpleframework.xml.Path;
 import org.simpleframework.xml.Root;
+import org.simpleframework.xml.Text;
 
 /**
  * Object representation of request XML of <a
@@ -53,5 +56,114 @@ public class ObjectLockConfiguration {
   /** Returns retention duration. */
   public RetentionDuration duration() {
     return (rule != null) ? rule.duration() : null;
+  }
+
+  @Root(name = "Rule", strict = false)
+  public static class Rule {
+    @Path(value = "DefaultRetention")
+    @Element(name = "Mode", required = false)
+    private RetentionMode mode;
+
+    @Path(value = "DefaultRetention")
+    @ElementUnion({
+      @Element(name = "Days", type = RetentionDurationDays.class, required = false),
+      @Element(name = "Years", type = RetentionDurationYears.class, required = false)
+    })
+    private RetentionDuration duration;
+
+    public Rule(
+        @Element(name = "Mode", required = false) RetentionMode mode,
+        @ElementUnion({
+              @Element(name = "Days", type = RetentionDurationDays.class, required = false),
+              @Element(name = "Years", type = RetentionDurationYears.class, required = false)
+            })
+            RetentionDuration duration) {
+      if (mode != null && duration != null) {
+        this.mode = mode;
+        this.duration = duration;
+      } else if (mode != null || duration != null) {
+        if (mode == null) {
+          throw new IllegalArgumentException("mode is null");
+        }
+        throw new IllegalArgumentException("duration is null");
+      }
+    }
+
+    public RetentionMode mode() {
+      return mode;
+    }
+
+    public RetentionDuration duration() {
+      return duration;
+    }
+  }
+
+  public static interface RetentionDuration {
+    public RetentionDurationUnit unit();
+
+    public int duration();
+  }
+
+  public static enum RetentionDurationUnit {
+    DAYS,
+    YEARS;
+  }
+
+  @Root(name = "Days")
+  public static class RetentionDurationDays implements RetentionDuration {
+    @Text(required = false)
+    private Integer days;
+
+    public RetentionDurationDays() {}
+
+    public RetentionDurationDays(int days) {
+      this.days = Integer.valueOf(days);
+    }
+
+    public RetentionDurationUnit unit() {
+      return RetentionDurationUnit.DAYS;
+    }
+
+    public int duration() {
+      return days;
+    }
+
+    /** Returns RetentionDurationDays as string. */
+    @Override
+    public String toString() {
+      if (days == null) {
+        return "";
+      }
+      return days.toString() + ((days == 1) ? " day" : " days");
+    }
+  }
+
+  @Root(name = "Years")
+  public static class RetentionDurationYears implements RetentionDuration {
+    @Text(required = false)
+    private Integer years;
+
+    public RetentionDurationYears() {}
+
+    public RetentionDurationYears(int years) {
+      this.years = Integer.valueOf(years);
+    }
+
+    public RetentionDurationUnit unit() {
+      return RetentionDurationUnit.YEARS;
+    }
+
+    public int duration() {
+      return years;
+    }
+
+    /** Returns RetentionDurationYears as string. */
+    @Override
+    public String toString() {
+      if (years == null) {
+        return "";
+      }
+      return years.toString() + ((years == 1) ? " year" : " years");
+    }
   }
 }

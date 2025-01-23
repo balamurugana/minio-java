@@ -74,4 +74,26 @@ public class ListVersionsResult extends ListObjectsResult {
   public List<DeleteMarker> deleteMarkers() {
     return Utils.unmodifiableList(deleteMarkers);
   }
+
+  @Root(name = "Version", strict = false)
+  public static class Version extends Item {
+    public Version() {
+      super();
+    }
+
+    public Version(String prefix) {
+      super(prefix);
+    }
+  }
+
+  @Root(name = "DeleteMarker", strict = false)
+  public static class DeleteMarker extends Item {
+    public DeleteMarker() {
+      super();
+    }
+
+    public DeleteMarker(String prefix) {
+      super(prefix);
+    }
+  }
 }
